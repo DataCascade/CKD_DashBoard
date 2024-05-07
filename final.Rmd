@@ -1,0 +1,430 @@
+---
+title: "Chronic Kidney Disease"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+# install.packages("flexdashboard")
+# install.packages("tidyverse")
+# install.packages("highcharter")
+# install.packages("dplyr")
+# install.packages("gt")
+# install.packages("htmlools")
+# install.packages("viridis")
+# install.packages("ggplot2")
+library(flexdashboard)
+library(tidyverse)
+library(highcharter)
+library(dplyr)
+library(gt)
+library(htmltools)
+library(viridis)
+library(ggplot2)
+```
+
+```{r}
+#IMPORTING DATA
+data<-read.csv("kidney_disease.csv")
+```
+
+```{r}
+data <- data %>% 
+  mutate(classification_value = ifelse(classification == "ckd", 1, 0)) %>%
+  mutate(ane_value = ifelse(ane == "yes", 1, 0)) %>%
+  mutate(htn_value = ifelse(htn == "yes", 1, 0)) %>%
+  mutate(appetg_value = ifelse(appet == "good", "good appetite", "poor appetite")) %>%
+  mutate(appetb_value = ifelse(appet == "poor", "poor appetite", "good appetite")) %>%
+  mutate(dm_value = ifelse(dm == "yes", 1, 0))
+  
+View(data)
+```
+
+
+AGE
+=======================================================================
+
+Row 
+-----------------------------------------------------------------------
+
+```{r}
+#Colors
+custom_colors<- viridis::magma(7)
+#Anaemia count of different age groups
+data %>%
+  group_by(age) %>%
+  summarise(ane_value= sum(ane_value)) %>%
+  hchart('bar', hcaes(x=age, y=ane_value, color= custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Anaemia Count: </b> {point.y} <br>') %>%
+  hc_title(text= "Age related Anaemia prevalence",
+           style= list(fontSize = '15px' , fontWeight= 'bold'))%>%
+    hc_xAxis(title = list(text = "Age Group")) %>%
+  hc_yAxis(title = list(text = "Anaemia Count")) %>%
+  hc_size(width = 600, height = 400)
+```
+
+
+```{r}
+#Colors
+custom_colors<- viridis::magma(7)
+#Hypertension count of different age groups
+data %>%
+  group_by(age) %>%
+  summarise(htn_value= sum(htn_value)) %>%
+  hchart('bar', hcaes(x=age, y=htn_value, color= custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Hypertension Count: </b> {point.y} <br>') %>%
+  hc_title(text= "Age related Hypertension prevalence",
+           style= list(fontSize = '15px' , fontWeight= 'bold'))%>%
+    hc_xAxis(title = list(text = "Age Group")) %>%
+  hc_yAxis(title = list(text = "Hypertension")) %>%
+  hc_size(width = 600, height = 400)
+```
+
+
+```{r}
+#Colors
+custom_colors<- viridis::magma(7)
+#Diabetes count according to their age
+data %>%
+  group_by(age) %>%
+  summarise(dm_value= sum(dm_value)) %>%
+  hchart('bar', hcaes(x=age, y=dm_value, color= custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Diabetes Count:</b> {point.y} <br>') %>%
+  hc_title(text= "Age related Diabetes prevalence",
+           style= list(fontSize = '15px' , fontWeight= 'bold'))%>%
+    hc_xAxis(title = list(text = "Age Group")) %>%
+  hc_yAxis(title = list(text = "Diabetes")) %>%
+  hc_size(width = 600, height = 400)
+```
+
+Row
+-------------------------------------------------------------------------------
+
+```{r}
+# Colors
+custom_colors <- viridis::rocket(7)
+
+data %>%
+  group_by(age) %>%
+  summarise(count = n()) %>%
+  mutate(percentage = (count / sum(count)) * 100) %>%  # Calculate the percentage
+  hchart('pie', hcaes(x = age, y = count, color = custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Age </b>: {point.name} <br> <b> Count </b>: {point.y} <br> <b> Percentage </b>: {point.percentage:.1f}% <br>') %>%  # Show count and percentage
+  hc_title(text = "Distribution of Age Groups",
+           style = list(fontSize = '15px', fontWeight = 'bold')) %>%
+  hc_subtitle(text = '(Count and Percentage)',
+              style = list(fontSize = '10px')) %>%
+  hc_size(width = 600, height = 400)
+
+
+```
+
+
+```{r}
+# Create a color mapping for "Age"
+color_mapping <- c("21-30" = "red", "31-40" = "blue","41-50" = "green","51-60" = "yellow","61-70" = "pink","71-80" = "purple","81-90" = "orange")
+
+# Filter the data based on "Age"
+a_data <- data[data$age == "21-30", ]
+b_data <- data[data$age == "31-40", ]
+c_data <- data[data$age == "41-50", ]
+d_data <- data[data$age == "51-60", ]
+e_data <- data[data$age == "61-70", ]
+f_data <- data[data$age == "71-80", ]
+g_data <- data[data$age == "81-90", ]
+highchart() %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_add_series(
+    data = a_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["21-30"],
+    marker = list(symbol = "circle"),
+    name = "21-30"
+  ) %>%
+  hc_add_series(
+    data = b_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["31-40"],
+    marker = list(symbol = "circle"),
+    name = "31-40"
+  ) %>%
+    hc_add_series(
+    data = c_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["41-50"],
+    marker = list(symbol = "circle"),
+    name = "41-50"
+  ) %>%
+    hc_add_series(
+    data = d_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["51-60"],
+    marker = list(symbol = "circle"),
+    name = "51-60"
+  ) %>%
+    hc_add_series(
+    data = e_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["61-70"],
+    marker = list(symbol = "circle"),
+    name = "61-70"
+  ) %>%
+    hc_add_series(
+    data = f_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["71-80"],
+    marker = list(symbol = "circle"),
+    name = "71-80"
+  ) %>%
+    hc_add_series(
+    data = g_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["81-90"],
+    marker = list(symbol = "circle"),
+    name = "81-90"
+  ) %>%
+  hc_title(text = "Correlation b/w Haemoglobin vs. Blood Urea Levels",style = list(fontSize = '15px', fontWeight = 'bold')) %>%
+  hc_subtitle(text = 'w.r.t Age Groups',
+              style = list(fontSize = '10px')) %>%
+  hc_xAxis(title = list(text = "Haemoglobin (g/dl)")) %>%
+  hc_yAxis(title = list(text = "Blood Urea (mg/dl)")) %>%
+  hc_legend(title = list(text = "Age Group")) %>%
+  hc_size(width = 600, height = 400)
+```
+
+
+```{r}
+# Define custom colors
+custom_colors <- viridis::mako(7)
+
+data %>%
+  group_by(age) %>%
+  summarise(sc = mean(sc)) %>%
+  arrange(desc(sc)) %>%
+  hchart('column', hcaes(x = age, y = sc, color = custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Average of Serum Ceratinine </b> {point.y} <br>') %>%
+  hc_title(text = "Age v/s Serum Ceratinine",
+           style = list(fontSize = '15px', fontWeight = 'bold')) %>%
+  hc_subtitle(text = 'Comparison',
+              style = list(fontSize = '10px'))%>%
+  hc_size(width = 600, height = 400)
+```
+Row
+------------------------------------------------------
+
+
+```{r fig.height=3,fig.width=5}
+data$appetg_value <- as.factor(data$appetg_value)
+data$appetb_value <- as.factor(data$appetb_value)
+colors <- c("springgreen", "firebrick1")  # Replace with your desired colors
+# Create the stacked bar chart with custom colors
+ggplot(data, aes(x =age)) +
+  geom_bar(aes(fill = appetg_value), position = "stack") +
+  geom_bar(aes(fill = appetb_value), position = "stack") +
+  labs(title = "Stacked Bar Chart representing appetite w.r.t age groups",
+       x = "Age Groups",
+       y = "Appetite Count") +
+  scale_fill_manual(values = colors) +  # Set custom colors
+  theme_minimal()
+```
+
+CLASSIFICATION {data-orientation=rows}
+==========================================================================
+
+Row
+--------------------------------------------------------------------------
+```{r}
+#Colors
+custom_colors<- viridis::magma(2)
+#Anaemia count based on Classification
+data %>%
+  group_by(classification) %>%
+  summarise(ane_value= sum(ane_value)) %>%
+  hchart('column', hcaes(x=classification, y=ane_value, color= custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Anaemia count: </b> {point.y} <br>') %>%
+  hc_title(text= "Anaemia count based on Classification",
+           style= list(fontSize = '15px' , fontWeight= 'bold'))%>%
+    hc_xAxis(title = list(text = "Age Group")) %>%
+    hc_yAxis(title = list(text = "Anaemia")) %>%
+  hc_size(width = 500, height = 400)
+```
+
+
+```{r}
+#Colors
+custom_colors<- viridis::mako(2)
+#Hypertension count based on Classification
+data %>%
+  group_by(classification) %>%
+  summarise(htn_value= sum(htn_value)) %>%
+  hchart('column', hcaes(x=classification, y=htn_value, color= custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Hypertension Count: </b> {point.y} <br>') %>%
+  hc_title(text= "Hypertension count based on Classification",
+           style= list(fontSize = '15px' , fontWeight= 'bold'))%>%
+    hc_xAxis(title = list(text = "Age Group")) %>%
+  hc_yAxis(title = list(text = "Hypertension")) %>%
+  hc_size(width = 500, height = 400)
+```
+
+
+```{r}
+#Colors
+custom_colors<- viridis::magma(2)
+#Diabetes count based on Classification
+data %>%
+  group_by(classification) %>%
+  summarise(dm_value= sum(dm_value)) %>%
+  hchart('column', hcaes(x=classification, y=dm_value, color= custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Diabetes count: </b> {point.y} <br>') %>%
+  hc_title(text= "Diabetes count based on Classification",
+           style= list(fontSize = '15px' , fontWeight= 'bold'))%>%
+    hc_xAxis(title = list(text = "Age Group")) %>%
+  hc_yAxis(title = list(text = "Diabetes")) %>%
+  hc_size(width = 500, height = 400)
+```
+
+```{r}
+# Define custom colors
+custom_colors <- viridis::mako(2)
+
+data %>%
+  group_by(classification) %>%
+  summarise(sc = mean(sc)) %>%
+  arrange(desc(sc)) %>%
+  hchart('column', hcaes(x = classification, y = sc, color = custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Average of Serum Ceratinine </b> {point.y} <br>') %>%
+  hc_title(text = "Classification v/s Serum Ceratinine",
+           style = list(fontSize = '15px', fontWeight = 'bold')) %>%
+  hc_subtitle(text = 'Comparison',
+              style = list(fontSize = '10px')) %>%
+    hc_size(width = 500, height = 400)
+```
+
+Row
+--------------------------------------------------------------------------------
+
+```{r}
+# Colors
+custom_colors <- viridis::magma(2)
+# CLassification distribution 
+data %>%
+  group_by(classification) %>%
+  summarise(count = n()) %>%
+  mutate(percentage = (count / sum(count)) * 100) %>%  # Calculate the percentage
+  hchart('pie', hcaes(x = classification, y = count, color = custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> Classification </b>: {point.name} <br> <b> Count </b>: {point.y} <br> <b> Percentage </b>: {point.percentage:.1f}% <br>') %>%  # Show count and percentage
+  hc_title(text = "Distribution of Classification",
+           style = list(fontSize = '15px', fontWeight = 'bold')) %>%
+  hc_subtitle(text = 'Count and Percentage',
+              style = list(fontSize = '10px')) %>%
+  hc_size(width = 500, height = 400)
+```
+
+```{r}
+#Colors
+custom_colors<- viridis::magma(7)
+#Different age groups having CKD
+data %>%
+  group_by(age) %>%
+  summarise(classification_value= sum(classification_value)) %>%
+  hchart('column', hcaes(x=age, y=classification_value, color= custom_colors)) %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_tooltip(pointFormat = '<b> CKD Count: </b> {point.y} <br>') %>%
+  hc_title(text= "Age groups having Chronic Kidney Disease",
+           style= list(fontSize = '15px' , fontWeight= 'bold'))%>%
+    hc_xAxis(title = list(text = "Age Group")) %>%
+  hc_yAxis(title = list(text = "Chronic Kidney Disease ")) %>%
+  hc_size(width = 500, height = 400)
+```
+
+
+```{r}
+# Create a color mapping for "classification"
+color_mapping <- c("ckd" = "red", "notckd" ="chartreuse")
+
+# Filter the data based on "classification"
+ckd_data <- data[data$classification == "ckd", ]
+notckd_data <- data[data$classification == "notckd", ]
+
+highchart() %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_add_series(
+    data = ckd_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["ckd"],
+    marker = list(symbol = "circle"),
+    name = "CKD"
+  ) %>%
+  hc_add_series(
+    data = notckd_data,
+    type = "scatter",
+    hcaes(x = hemo, y = bu),
+    color = color_mapping["notckd"],
+    marker = list(symbol = "circle"),
+    name = "Not CKD"
+  ) %>%
+  hc_title(text = "Haemoglobin vs. Blood Urea levels" ,style = list(fontSize = '15px', fontWeight = 'bold')) %>%
+  hc_subtitle(text = 'w.r.t Classification',
+              style = list(fontSize = '10px')) %>%
+  hc_xAxis(title = list(text = "Haemoglobin (g/dl)")) %>%
+  hc_yAxis(title = list(text = "Blood Urea (mg/dl)")) %>%
+  hc_legend(title = list(text = "Classification")) %>%
+  hc_size(width = 500, height = 400)
+```
+
+```{r}
+# Create a color mapping for "classification"
+color_mapping <- c("ckd" = "red", "notckd" = "chartreuse")
+
+# Filter the data based on "classification"
+ckd_data <- data[data$classification == "ckd", ]
+notckd_data <- data[data$classification == "notckd", ]
+
+highchart() %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_add_series(
+    data = ckd_data,
+    type = "scatter",
+    hcaes(x = bp_diastolic, y = bp_systolic),
+    color = color_mapping["ckd"],
+    marker = list(symbol = "circle"),
+    name = "CKD"
+  ) %>%
+  hc_add_series(
+    data = notckd_data,
+    type = "scatter",
+    hcaes(x = bp_diastolic, y = bp_systolic),
+    color = color_mapping["notckd"],
+    marker = list(symbol = "circle"),
+    name = "Not CKD"
+  ) %>%
+  hc_title(text = "Scatter Plot of Blood Pressure Range",style = list(fontSize = '15px', fontWeight ='bold'))%>%
+  hc_xAxis(title = list(text = "bp_diastolic")) %>%
+  hc_yAxis(title = list(text = "bp_systolic")) %>%
+  hc_legend(title = list(text = "Classification")) %>%
+  hc_size(width = 500, height = 400)
+```
+
+
+
+
