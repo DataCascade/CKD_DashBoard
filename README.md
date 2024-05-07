@@ -1,2 +1,2 @@
 # CKD_DashBoard
-Generated interactive dashboards and visualizations to communicate key findings effectively to stakeholders and facilitate decision-making processes in healthcare settings.
+Investigated the association between age and the presence of Chronic Kidney Disease (CKD) using statistical analysis techniques.Utilized R programming language and packages such as flexdashboard, tidyverse, and ggplot2 for data processing, analysis, and visualization. Generated interactive dashboards and visualizations to communicate key findings effectively to stakeholders and facilitate decision-making processes in healthcare settings.
